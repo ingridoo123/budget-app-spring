@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: budget-app-postgres
+    environment:
+      POSTGRES_DB: budget_app_db
+      POSTGRES_USER: budget_user
+      POSTGRES_PASSWORD: budget_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    networks:
+      - budget-app-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: budget-app-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@budget-app.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - budget-app-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  budget-app-network:
+    driver: bridge
